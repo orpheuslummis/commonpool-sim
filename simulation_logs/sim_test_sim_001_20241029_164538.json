@@ -1,0 +1,79 @@
+{
+  "simulation_id": "test_sim_001",
+  "start_time": "2024-10-29T16:45:38.264755",
+  "end_time": "2024-10-29T16:45:38.282565",
+  "initial_states": {
+    "Alice": {
+      "name": "Alice",
+      "personality": "generous",
+      "resources": {
+        "books": 3,
+        "gardening_hours": 5
+      },
+      "needs": [
+        "cooking_lessons"
+      ],
+      "exchange_count": 0
+    },
+    "Bob": {
+      "name": "Bob",
+      "personality": "cautious",
+      "resources": {
+        "cooking_skills": 2,
+        "tools": 4
+      },
+      "needs": [
+        "books"
+      ],
+      "exchange_count": 0
+    }
+  },
+  "exchanges": [
+    {
+      "timestamp": "2024-10-29T16:45:38.282523",
+      "initiator": "Alice",
+      "responder": "Bob",
+      "offer": {
+        "offered_items": {
+          "books": 2
+        },
+        "requested_items": {
+          "cooking_skills": 1
+        },
+        "message": "Would love to trade books for cooking lessons!"
+      },
+      "facilitator_notes": "Error processing request",
+      "conversation": [
+        "Error processing request"
+      ],
+      "outcome": "pending",
+      "final_terms": null
+    }
+  ],
+  "final_states": {
+    "Alice": {
+      "name": "Alice",
+      "personality": "generous",
+      "resources": {
+        "books": 3,
+        "gardening_hours": 5
+      },
+      "needs": [
+        "cooking_lessons"
+      ],
+      "exchange_count": 1
+    },
+    "Bob": {
+      "name": "Bob",
+      "personality": "cautious",
+      "resources": {
+        "cooking_skills": 2,
+        "tools": 4
+      },
+      "needs": [
+        "books"
+      ],
+      "exchange_count": 1
+    }
+  }
+}

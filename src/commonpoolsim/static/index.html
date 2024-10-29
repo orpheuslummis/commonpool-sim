@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Common Pool Simulation Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <nav class="bg-indigo-600 shadow-lg">
+            <div class="container mx-auto px-4 py-3">
+                <h1 class="text-2xl font-bold text-white">Common Pool Simulation Analysis</h1>
+            </div>
+        </nav>
+
+        <div class="container mx-auto px-4 py-6">
+            <div id="simulationSummary" class="mb-6"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Simulation List Panel -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-semibold text-gray-800">Simulations</h2>
+                            <div class="flex gap-2">
+                                <input type="text" id="searchInput" placeholder="Search simulations..."
+                                    class="px-3 py-1 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                        </div>
+                        <div id="simulationList" class="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto"></div>
+                    </div>
+                </div>
+
+                <!-- Simulation Details Panel -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <div id="simulationDetails" class="space-y-6">
+                            <div class="text-center text-gray-500 py-12">
+                                Select a simulation to view details
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const formatResources = (resources) => {
+            return Object.entries(resources)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join(', ');
+        };
+
+        const createParticipantCard = (participant) => `
+            <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div class="flex justify-between items-start">
+                    <div class="font-medium text-indigo-600">${participant.name}</div>
+                    <span class="text-xs px-2 py-1 bg-gray-200 rounded-full">${participant.personality}</span>
+                </div>
+                <div class="mt-2 text-sm">
+                    <div class="text-gray-600">
+                        <i class="fas fa-cube mr-1"></i> ${formatResources(participant.resources)}
+                    </div>
+                    <div class="text-gray-600">
+                        <i class="fas fa-bullseye mr-1"></i> Needs: ${participant.needs.join(', ')}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const createExchangeCard = (exchange, index) => `
+            <div class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="font-medium text-lg">Exchange ${index + 1}</div>
+                    <span class="px-2 py-1 rounded-full text-sm ${exchange.outcome === 'success' ? 'bg-green-100 text-green-800' :
+                exchange.outcome === 'failed' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'
+            }">${exchange.outcome}</span>
+                </div>
+                <div class="flex items-center text-gray-600 mb-3">
+                    <span class="font-medium">${exchange.initiator}</span>
+                    <i class="fas fa-arrow-right mx-2"></i>
+                    <span class="font-medium">${exchange.responder}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div class="bg-gray-50 p-2 rounded">
+                        <div class="font-medium mb-1">Offered:</div>
+                        ${formatResources(exchange.offer.offered_items)}
+                    </div>
+                    <div class="bg-gray-50 p-2 rounded">
+                        <div class="font-medium mb-1">Requested:</div>
+                        ${formatResources(exchange.offer.requested_items)}
+                    </div>
+                </div>
+                ${exchange.offer.message ? `
+                    <div class="mt-3 text-sm text-gray-600 italic">
+                        "${exchange.offer.message}"
+                    </div>
+                ` : ''}
+            </div>
+        `;
+
+        async function loadSimulations() {
+            const response = await fetch('/api/simulations');
+            const simulations = await response.json();
+            const listElement = document.getElementById('simulationList');
+
+            listElement.innerHTML = simulations.map(sim => `
+                <div class="p-3 hover:bg-gray-50 cursor-pointer rounded-lg border border-gray-200 transition-colors"
+                     onclick="loadSimulationDetails('${sim.filename}')">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-medium text-indigo-600">${sim.id}</div>
+                            <div class="text-sm text-gray-500">
+                                ${new Date(sim.start_time).toLocaleString()}
+                            </div>
+                        </div>
+                        <div class="text-sm bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full">
+                            ${sim.participants.length} participants
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadSimulationDetails(filename) {
+            const response = await fetch(`/api/simulations/${filename}`);
+            const sim = await response.json();
+            const detailsElement = document.getElementById('simulationDetails');
+            const summaryElement = document.getElementById('simulationSummary');
+
+            summaryElement.innerHTML = sim.summary ? `
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Simulation Summary</h3>
+                    <p class="text-gray-600">${sim.summary}</p>
+                </div>
+            ` : '';
+
+            detailsElement.innerHTML = `
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Initial States</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${Object.values(sim.initial_states).map(createParticipantCard).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Exchanges</h3>
+                        <div class="space-y-4">
+                            ${sim.exchanges.map((exchange, index) => createExchangeCard(exchange, index)).join('')}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Final States</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${Object.values(sim.final_states).map(createParticipantCard).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function (e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const simulations = document.querySelectorAll('#simulationList > div');
+
+            simulations.forEach(sim => {
+                const text = sim.textContent.toLowerCase();
+                sim.style.display = text.includes(searchTerm) ? 'block' : 'none';
+            });
+        });
+
+        // Load simulations when page loads
+        loadSimulations();
+    </script>
+</body>
+
+</html>

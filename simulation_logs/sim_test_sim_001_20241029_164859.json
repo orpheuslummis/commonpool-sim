@@ -1,0 +1,79 @@
+{
+  "simulation_id": "test_sim_001",
+  "start_time": "2024-10-29T16:48:59.919579",
+  "end_time": "2024-10-29T16:49:07.129686",
+  "initial_states": {
+    "Alice": {
+      "name": "Alice",
+      "personality": "generous",
+      "resources": {
+        "books": 3,
+        "gardening_hours": 5
+      },
+      "needs": [
+        "cooking_lessons"
+      ],
+      "exchange_count": 0
+    },
+    "Bob": {
+      "name": "Bob",
+      "personality": "cautious",
+      "resources": {
+        "cooking_skills": 2,
+        "tools": 4
+      },
+      "needs": [
+        "books"
+      ],
+      "exchange_count": 0
+    }
+  },
+  "exchanges": [
+    {
+      "timestamp": "2024-10-29T16:49:07.129674",
+      "initiator": "Alice",
+      "responder": "Bob",
+      "offer": {
+        "offered_items": {
+          "books": 2
+        },
+        "requested_items": {
+          "cooking_skills": 1
+        },
+        "message": "Would love to trade books for cooking lessons!"
+      },
+      "facilitator_notes": "I'll help evaluate this trade offer between Alice and Bob.\n\nAnalysis:\n1. Offer details:\n- Alice is offering: 2 books\n- Alice is requesting: 1 cooking skill\n- Message indicates interest in cooking lessons\n\n2. Resource check:\n- Alice has: 3 books, 5 gardening hours\n- Bob has: 2 cooking skills, 4 tools\n- Both parties have sufficient resources for the trade\n\n3. Fairness assessment:\n- Books are tangible items while cooking skills represent knowledge transfer\n- The 2:1 ratio seems reasonable since skills/knowledge have long-term value\n- Teaching cooking requires time and effort from Bob\n\n4. Context:\n- No previous trading history between parties\n- Friendly tone in the message\n- Clear mutual benefit: Alice gains cooking knowledge, Bob gains books\n\nRecommendation: This appears to be a fair and mutually beneficial trade. Bob has enough cooking skills to share, and Alice is offering a reasonable number of books in exchange. The trade should proceed.\n\nDecision: ACCEPT",
+      "conversation": [
+        "Error processing request"
+      ],
+      "outcome": "pending",
+      "final_terms": null
+    }
+  ],
+  "final_states": {
+    "Alice": {
+      "name": "Alice",
+      "personality": "generous",
+      "resources": {
+        "books": 3,
+        "gardening_hours": 5
+      },
+      "needs": [
+        "cooking_lessons"
+      ],
+      "exchange_count": 1
+    },
+    "Bob": {
+      "name": "Bob",
+      "personality": "cautious",
+      "resources": {
+        "cooking_skills": 2,
+        "tools": 4
+      },
+      "needs": [
+        "books"
+      ],
+      "exchange_count": 1
+    }
+  }
+}
