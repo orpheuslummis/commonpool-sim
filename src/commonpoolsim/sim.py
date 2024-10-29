@@ -8,6 +8,7 @@ import litellm
 import json
 from pathlib import Path
 import random
+import argparse
 
 load_dotenv(".env.local")
 
@@ -259,14 +260,52 @@ class CommonPoolExchange:
 
 # Example usage
 async def main():
-    # Create exchange system with specific simulation ID
-    exchange = CommonPoolExchange(simulation_id="market_sim_001")
+    # Add command line argument parsing
+    parser = argparse.ArgumentParser(description="Run Common Pool Exchange Simulation")
+    parser.add_argument(
+        "--simulation-id",
+        type=str,
+        default=None,
+        help="Unique identifier for the simulation",
+    )
+    parser.add_argument(
+        "--num-participants",
+        type=int,
+        default=5,
+        help="Number of participants in the simulation",
+    )
+    parser.add_argument(
+        "--min-exchanges",
+        type=int,
+        default=5,
+        help="Minimum number of exchanges to simulate",
+    )
+    parser.add_argument(
+        "--max-exchanges",
+        type=int,
+        default=7,
+        help="Maximum number of exchanges to simulate",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default="simulation_logs",
+        help="Directory for simulation output files",
+    )
+    args = parser.parse_args()
+
+    # Create exchange system with provided simulation ID
+    exchange = CommonPoolExchange(
+        simulation_id=args.simulation_id
+        or f"market_sim_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    )
+    exchange.logger = SimulationLogger(output_dir=args.output_dir)
 
     # Simplified resources (reduced from 5 to 3)
     resources = {
         "books": (1, 2),
         "tools": (0, 2),
-        "skills": (0, 2),  # Combined skills instead of separate types
+        "skills": (0, 2),
     }
 
     # Simplified personalities (reduced from 5 to 3)
@@ -276,22 +315,22 @@ async def main():
         "strategic",
     ]
 
-    # Create 5 participants with simplified attributes
+    # Create participants with simplified attributes
     participants = [
         {
-            "name": f"P{i+1}",  # Shorter names
+            "name": f"P{i+1}",
             "personality": random.choice(personalities),
             "resources": {
                 resource: random.randint(min_val, max_val)
                 for resource, (min_val, max_val) in resources.items()
-                if random.random() > 0.4  # 60% chance to have each resource
+                if random.random() > 0.4
             },
             "needs": random.sample(
                 list(resources.keys()),
-                k=1,  # Each participant needs exactly 1 resource
+                k=1,
             ),
         }
-        for i in range(5)
+        for i in range(args.num_participants)
     ]
 
     # Add participants to exchange system
@@ -303,8 +342,8 @@ async def main():
             needs=p["needs"],
         )
 
-    # Reduced number of exchanges (from 8-12 to 5-7)
-    num_exchanges = random.randint(5, 7)
+    # Use provided min/max exchanges
+    num_exchanges = random.randint(args.min_exchanges, args.max_exchanges)
 
     for _ in range(num_exchanges):
         # Randomly select initiator and responder
